@@ -10,9 +10,28 @@ st.set_page_config(page_title="Titanic Survival Predictor")
 st.title("🚢 Titanic Survival Predictor")
 st.write("Enter the passenger's details below to see their chance of survival.")
 
+df = pd.read_csv('Titanic_train.csv')
+
+# 2. Quick Clean (Minimum needed for the model to work)
+df['Age'] = df['Age'].fillna(df['Age'].median())
+df['Sex'] = df['Sex'].map({'male': 0, 'female': 1})
+
+# 3. Pick the features
+features = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare']
+X = df[features]
+y = df['Survived']
+
+# 4. Train the "Brain"
+model = LogisticRegression()
+model.fit(X, y)
+
+# 5. SAVE THE BRAIN (This creates the file you need!)
+with open('titanic_model.pkl', 'wb') as f:
+    pickle.dump(model, f)
+
 # --- STEP 1: LOAD THE MODEL ---
 # This looks for the 'titanic_model.pkl' file you uploaded to GitHub
-model_path = 'Titanic_train.csv'
+model_path = 'Titanic_train.pkl'
 
 if os.path.exists(model_path):
     with open(model_path, 'rb') as f:
