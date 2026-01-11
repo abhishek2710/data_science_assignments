@@ -4,9 +4,15 @@ import pickle
 import numpy as np
 
 # Load the saved model
-with open('titanic_model.pkl', 'rb') as f:
-    model = pickle.load(f)
+current_dir = os.path.dirname(__file__)
+model_path = os.path.join(current_dir, 'titanic_model.pkl')
 
+if os.path.exists(model_path):
+    with open(model_path, 'rb') as f:
+        model = pickle.load(f)
+else:
+    st.error("The file 'titanic_model.pkl' was not found in the GitHub folder!")
+    
 st.set_page_config(page_title="Titanic Predictor")
 st.title("🚢 Titanic Survival Predictor")
 
