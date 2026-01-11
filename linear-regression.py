@@ -5,7 +5,7 @@ import numpy as np
 import os
 
 # 1. Setup Page
-st.set_page_config(page_title="Titanic Survival Predictor", icon="🚢")
+st.set_page_config(page_title="Titanic Survival Predictor")
 st.title("🚢 Titanic Survival Predictor")
 
 # 2. Find and Load the Model
