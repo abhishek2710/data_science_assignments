@@ -8,7 +8,7 @@ with open('titanic_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
 st.set_page_config(page_title="Titanic Predictor")
-st.title("🚢 Titanic Survival Predictor")
+st.title("Titanic Survival Predictor")
 
 # Sidebar inputs
 st.sidebar.header("Passenger Details")
@@ -25,7 +25,7 @@ sex_val = 1 if sex == 'female' else 0
 emb_q = 1 if embarked == 'Q' else 0
 emb_s = 1 if embarked == 'S' else 0
 
-input_data = np.array([[pclass, sex_val, age, sibsp, parch, fare, emb_q, emb_s]])
+input_data = np.array([[pclass, sex_val, age, sibsp, parch, fare]])
 
 if st.button("Calculate Survival Probability"):
     prediction = model.predict(input_data)
