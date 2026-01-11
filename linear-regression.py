@@ -2,89 +2,36 @@ import streamlit as st
 import pandas as pd
 import pickle
 import numpy as np
-import os
 
-# --- PAGE CONFIG ---
-st.set_page_config(page_title="Titanic Survival Predictor")
+# Load the saved model
+with open('titanic_model.pkl', 'rb') as f:
+    model = pickle.load(f)
 
+st.set_page_config(page_title="Titanic Predictor")
 st.title("🚢 Titanic Survival Predictor")
-st.write("Enter the passenger's details below to see their chance of survival.")
 
-df = pd.read_csv('Titanic_train.csv')
-
-# 2. Quick Clean (Minimum needed for the model to work)
-df['Age'] = df['Age'].fillna(df['Age'].median())
-df['Sex'] = df['Sex'].map({'male': 0, 'female': 1})
-
-# 3. Pick the features
-features = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare']
-X = df[features]
-y = df['Survived']
-
-# 4. Train the "Brain"
-model = LogisticRegression()
-model.fit(X, y)
-
-# 5. SAVE THE BRAIN (This creates the file you need!)
-with open('titanic_model.pkl', 'wb') as f:
-    pickle.dump(model, f)
-
-# --- STEP 1: LOAD THE MODEL ---
-# This looks for the 'titanic_model.pkl' file you uploaded to GitHub
-model_path = 'Titanic_train.pkl'
-
-if os.path.exists(model_path):
-    with open(model_path, 'rb') as f:
-        model = pickle.load(f)
-else:
-    st.error(f"❌ Error: '{model_path}' not found! Please upload the model file to GitHub.")
-    st.stop()
-
-# --- STEP 2: USER INPUTS (Sidebar) ---
-st.sidebar.header("Passenger Profile")
-
-pclass = st.sidebar.selectbox("Ticket Class (1=High, 3=Low)", [1, 2, 3])
-sex = st.sidebar.radio("Gender", ["male", "female"])
+# Sidebar inputs
+st.sidebar.header("Passenger Details")
+pclass = st.sidebar.selectbox("Ticket Class", [1, 2, 3])
+sex = st.sidebar.radio("Sex", ["male", "female"])
 age = st.sidebar.slider("Age", 0, 100, 25)
-sibsp = st.sidebar.number_input("Siblings or Spouses aboard", 0, 10, 0)
-parch = st.sidebar.number_input("Parents or Children aboard", 0, 10, 0)
-fare = st.sidebar.number_input("Ticket Fare ($)", 0.0, 500.0, 32.0)
-embarked = st.sidebar.selectbox("Port of Embarkation", ["Southampton (S)", "Cherbourg (C)", "Queenstown (Q)"])
+sibsp = st.sidebar.number_input("Siblings/Spouses Aboard", 0, 10, 0)
+parch = st.sidebar.number_input("Parents/Children Aboard", 0, 10, 0)
+fare = st.sidebar.number_input("Fare", 0.0, 500.0, 32.0)
+embarked = st.sidebar.selectbox("Port of Embarkation", ["S", "C", "Q"])
 
-# --- STEP 3: PREPROCESS INPUTS ---
-# Convert 'sex' to 0 or 1
-sex_val = 1 if sex == "female" else 0
+# Prepare input data (Must match the 8 features used in training)
+sex_val = 1 if sex == 'female' else 0
+emb_q = 1 if embarked == 'Q' else 0
+emb_s = 1 if embarked == 'S' else 0
 
-# Convert 'embarked' to the dummy variables we used in training (Embarked_Q, Embarked_S)
-emb_q = 1 if "Q" in embarked else 0
-emb_s = 1 if "S" in embarked else 0
+input_data = np.array([[pclass, sex_val, age, sibsp, parch, fare, emb_q, emb_s]])
 
-# Put all 8 features in a list (The order must match your training data!)
-# [Pclass, Sex, Age, SibSp, Parch, Fare, Embarked_Q, Embarked_S]
-features = np.array([[pclass, sex_val, age, sibsp, parch, fare, emb_q, emb_s]])
-
-# --- STEP 4: PREDICTION ---
-if st.button("Predict Survival Status"):
-    # Get the 0 or 1 prediction
-    prediction = model.predict(features)
-    
-    # Get the probability (percentage)
-    probability = model.predict_proba(features)[0][1]
-    
-    st.divider()
+if st.button("Calculate Survival Probability"):
+    prediction = model.predict(input_data)
+    probability = model.predict_proba(input_data)[0][1]
     
     if prediction[0] == 1:
-        st.balloons()
-        st.success(f"### Result: Survived! 🎉")
-        st.write(f"The model is **{probability:.2%}** confident this passenger would survive.")
+        st.success(f"High probability of survival! ({probability:.2%})")
     else:
-        st.error(f"### Result: Did Not Survive 😔")
-        st.write(f"The model is **{(1-probability):.2%}** confident this passenger would not survive.")
-
-# --- STEP 5: INTERPRETATION (Optional UI) ---
-with st.expander("How does this work?"):
-    st.write("""
-    This app uses a **Logistic Regression** model. It looks at factors like 
-    class and gender—which were historically significant during the Titanic 
-    disaster—to calculate a probability of survival.
-    """)
+        st.error(f"Low probability of survival. ({probability:.2%})")
