@@ -16,7 +16,7 @@ sex_val = 1 if sex == "female" else 0
 
 if st.button("Predict Survival"):
     # 1. Load the "Brain"
-    with open('titanic_model.pkl', 'rb') as f:
+    with open('Titanic_train.csv', 'rb') as f:
         model = pickle.load(f)
     
     # 2. Package the data (adding 0s for missing features like SibSp/Parch)
