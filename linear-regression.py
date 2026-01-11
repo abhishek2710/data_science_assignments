@@ -5,7 +5,7 @@ import numpy as np
 import os
 
 # --- PAGE CONFIG ---
-st.set_page_config(page_title="Titanic Survival Predictor", icon="🚢")
+st.set_page_config(page_title="Titanic Survival Predictor")
 
 st.title("🚢 Titanic Survival Predictor")
 st.write("Enter the passenger's details below to see their chance of survival.")
