@@ -12,7 +12,7 @@ st.write("Enter the passenger's details below to see their chance of survival.")
 
 # --- STEP 1: LOAD THE MODEL ---
 # This looks for the 'titanic_model.pkl' file you uploaded to GitHub
-model_path = 'Titanic_train.pkl'
+model_path = 'Titanic_train.csv'
 
 if os.path.exists(model_path):
     with open(model_path, 'rb') as f:
